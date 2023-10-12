@@ -1,0 +1,35 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "format": "prettier --write \"**/*.{ts,vue,js,md,yaml,html}\"",
+    "lint": "eslint --fix .",
+    "typecheck": "nuxi typecheck"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "@nuxt/ui": "^2.9.0",
+    "nuxt": "^3.7.4",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5",
+    "eslint": "^8.51.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "@nuxt/eslint-config": "^0.2.0",
+    "@trivago/prettier-plugin-sort-imports": "^4.2.0",
+    "prettier": "^3.0.3",
+    "prettier-plugin-tailwindcss": "^0.5.5"
+  },
+  "dependencies": {
+    "@trpc/client": "^10.40.0",
+    "@trpc/server": "^10.40.0",
+    "replicate": "^0.20.1",
+    "superjson": "^2.0.0",
+    "trpc-nuxt": "^0.10.12",
+    "zod": "^3.22.4"
+  }
+}
