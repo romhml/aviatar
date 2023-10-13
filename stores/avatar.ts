@@ -15,7 +15,12 @@ export const useAvatar = defineStore('avatar', {
   },
 
   actions: {
-    async generate(input: { prompt: string; mask?: string; avatar?: string, model?: string }) {
+    async generate(input: {
+      prompt: string
+      mask?: string
+      avatar?: string
+      model?: string
+    }) {
       const { $client } = useNuxtApp()
       let prediction = await $client.avatar.generate.mutate(input)
 

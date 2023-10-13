@@ -16,7 +16,6 @@
     "@nuxt/eslint-config": "^0.2.0",
     "@nuxt/ui": "^2.9.0",
     "@pinia/nuxt": "^0.4.11",
-    "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
@@ -30,6 +29,7 @@
   "dependencies": {
     "@trpc/client": "^10.40.0",
     "@trpc/server": "^10.40.0",
+    "fabric": "6.0.0-beta13",
     "replicate": "^0.20.1",
     "superjson": "^2.0.0",
     "trpc-nuxt": "^0.10.12",

@@ -6,8 +6,8 @@ defineProps<{
 
 <template>
   <button
-    class="text-white/60 hover:text-white text-sm transition hover:bg-white/20 p-1 rounded flex items-center justify-center"
+    class="flex items-center justify-center rounded p-1 text-sm text-white/60 transition hover:bg-white/20 hover:text-white"
   >
-    <Icon :name="icon" class="w-4 h-4" />
+    <Icon :name="icon" class="h-4 w-4" />
   </button>
 </template>

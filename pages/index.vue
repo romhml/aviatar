@@ -4,7 +4,7 @@ const avatarStore = useAvatar()
 const canvas = ref()
 const prompt = ref<string>('')
 const loading = ref(false)
-const picture = ref<string>()
+const picture = ref<string>('/picture.jpeg')
 const fileInput = ref<HTMLInputElement>()
 const error = ref()
 
@@ -12,14 +12,14 @@ async function loadFile() {
   fileInput.value?.click()
 }
 
-// async function downloadMask() {
-//   const mask = canvas.value.getMask()
-//   const el = document.createElement('a')
-//   el.href = mask
-//   el.download = 'mask.png'
-//   el.click()
-//   el.remove()
-// }
+async function downloadMask() {
+  const mask = await canvas.value.getMask()
+  const el = document.createElement('a')
+  el.href = mask
+  el.download = 'mask.png'
+  el.click()
+  el.remove()
+}
 //
 // async function downloadPicture() {
 //   if (!picture.value) return
@@ -59,9 +59,7 @@ async function generate() {
     try {
       await avatarStore.generate({
         prompt: prompt.value,
-        mask: canvas.value.dirty
-          ? (canvas.value.getMask() as string)
-          : undefined,
+        mask: await canvas.value.getMask(),
         avatar: reader.result as string,
       })
       picture.value = avatarStore.avatar
@@ -81,12 +79,11 @@ async function generate() {
     <Transition mode="out-in">
       <div v-if="picture" class="flex flex-col items-center">
         <div class="relative h-80 w-80 overflow-hidden">
-          <img
-            ref="pictureElement"
-            :src="picture"
-            class="absolute h-80 w-80 inset-0 select-none pointer-events-none rounded object-cover"
+          <BaseInpaintingCanvas
+            ref="canvas"
+            :image="picture"
+            class="absolute h-full w-full border"
           />
-          <BaseInpaintingCanvas ref="canvas" class="absolute w-full h-full" />
           <Transition mode="in-out">
             <BaseNoise v-if="loading" />
           </Transition>
@@ -95,27 +92,27 @@ async function generate() {
 
       <div
         v-else
-        class="bg-zinc-100 border border-dashed border-zinc-200 rounded w-80 h-80 cursor-pointer flex items-center justify-center"
+        class="flex h-80 w-80 cursor-pointer items-center justify-center rounded border border-dashed border-zinc-200 bg-zinc-100"
         @click="loadFile"
       >
-        <p class="text-center text-zinc-400 text-sm">Upload your picture</p>
+        <p class="text-center text-sm text-zinc-400">Upload your picture</p>
       </div>
     </Transition>
 
     <div
-      class="flex space-x-4 rounded-full bg-white pl-4 pr-2 py-2 border border-zinc-200 items-center w-full max-w-md shadow-lg mt-8 transition"
-      :class="{ 'opacity-50 cursor-not-allowed': loading || !picture }"
+      class="mt-8 flex w-full max-w-md items-center space-x-4 rounded-full border border-zinc-200 bg-white py-2 pl-4 pr-2 shadow-lg transition"
+      :class="{ 'cursor-not-allowed opacity-50': loading || !picture }"
       @keydown.enter="generate()"
     >
       <input
         v-model="prompt"
         :rows="1"
-        class="outline-none resize-none w-full placeholder:text-zinc-300 disabled:bg-white"
+        class="w-full resize-none outline-none placeholder:text-zinc-300 disabled:bg-white"
         placeholder="Imagine something..."
         :disabled="loading || !picture"
       />
       <button
-        class="rounded-full bg-black text-white w-7 h-7 flex items-center justify-center flex-none"
+        class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-black text-white"
         :class="{ 'animate-pulse': loading }"
         :disabled="loading || !picture"
         @click="generate()"
@@ -130,7 +127,7 @@ async function generate() {
         </Transition>
       </button>
     </div>
-    <p v-if="error" class="text-red-500 text-sm mt-2">
+    <p v-if="error" class="mt-2 text-sm text-red-500">
       {{ error }}
     </p>
 

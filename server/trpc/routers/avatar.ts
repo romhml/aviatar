@@ -7,16 +7,16 @@ const replicate = new Replicate({
 })
 
 type Model = {
-  version: string,
+  version: string
 }
 
-const models: Record<string, Model>= {
+const models: Record<string, Model> = {
   inpaint: {
     version: 'c11bac58203367db93a3c552bd49a25a5418458ddffb7e90dae55780765e26d6',
   },
   vangogh: {
     version: '2d43b996608bd7d4aba4cacbe9b751399892a9d6cbc27a39f8f49347a3a16f9c',
-  }
+  },
 }
 
 const generateInput = z.object({
