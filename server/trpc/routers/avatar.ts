@@ -16,10 +16,10 @@ const models: Record<string, Model> = {
     tag: 'c11bac58203367db93a3c552bd49a25a5418458ddffb7e90dae55780765e26d6',
     name: 'stability-ai/stable-diffusion-inpainting',
   },
-  'sdxl': {
+  sdxl: {
     tag: 'c221b2b8ef527988fb59bf24a8b97c4561f1c671f73bd389f866bfb27c061316',
     name: 'stability-ai/sdxl',
-  }
+  },
 }
 
 const generateInput = z.object({
@@ -31,7 +31,11 @@ const generateInput = z.object({
 
 export const avatarRouter = router({
   generate: publicProcedure.input(generateInput).mutation(async ({ input }) => {
-    const model = input.model ? models[input.model] : input.mask ? models['stable-diffusion-inpainting'] : models['sdxl']
+    const model = input.model
+      ? models[input.model]
+      : input.mask
+      ? models['stable-diffusion-inpainting']
+      : models['sdxl']
 
     const output = await replicate.predictions.create({
       version: model.tag,
