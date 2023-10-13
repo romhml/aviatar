@@ -80,11 +80,11 @@ async function generate() {
   <div class="flex flex-col items-center py-8">
     <Transition mode="out-in">
       <div v-if="picture" class="flex flex-col items-center">
-        <div class="relative w-80 h-80 overflow-hidden">
+        <div class="relative h-80 w-80 overflow-hidden">
           <img
             ref="pictureElement"
             :src="picture"
-            class="absolute inset-0 select-none pointer-events-none rounded"
+            class="absolute h-80 w-80 inset-0 select-none pointer-events-none rounded object-cover"
           />
           <BaseInpaintingCanvas ref="canvas" class="absolute w-full h-full" />
           <Transition mode="in-out">
@@ -103,34 +103,30 @@ async function generate() {
     </Transition>
 
     <div
-      class="flex space-x-4 rounded-full bg-white pl-4 pr-2 py-2 border border-zinc-200 items-center w-full max-w-md shadow-lg mt-8"
+      class="flex space-x-4 rounded-full bg-white pl-4 pr-2 py-2 border border-zinc-200 items-center w-full max-w-md shadow-lg mt-8 transition"
+      :class="{ 'opacity-50 cursor-not-allowed': loading || !picture }"
       @keydown.enter="generate()"
     >
       <input
         v-model="prompt"
         :rows="1"
-        class="outline-none resize-none w-full placeholder:text-zinc-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        class="outline-none resize-none w-full placeholder:text-zinc-300 disabled:bg-white"
         placeholder="Imagine something..."
         :disabled="loading || !picture"
       />
       <button
-        class="rounded-full bg-black text-white w-7 h-7 flex items-center justify-center flex-none disabled:opacity-50 disabled:cursor-not-allowed transition"
+        class="rounded-full bg-black text-white w-7 h-7 flex items-center justify-center flex-none"
         :disabled="loading || !picture"
         @click="generate()"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="w-5 h-5"
-        >
-          <path
-            stroke-linejoin="round"
-            d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
+        <Transition mode="out-in">
+          <Icon
+            v-if="loading"
+            name="humbleicons:spinner-earring"
+            class="animate-spin"
           />
-        </svg>
+          <Icon v-else name="heroicons:arrow-right" />
+        </Transition>
       </button>
     </div>
     <p v-if="error" class="text-red-500 text-sm mt-2">
@@ -150,7 +146,7 @@ async function generate() {
 <style>
 .v-enter-active,
 .v-leave-active {
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.1s ease-in;
 }
 
 .v-enter-from,

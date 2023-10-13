@@ -1,10 +1,10 @@
 <template>
-  <footer class="px-8 py-4 text-center text-sm align-middle">
+  <footer class="px-8 py-2 text-center text-xs align-middle">
     <p>
       Made with
       <Icon
         name="heroicons-solid:heart"
-        class="w-6 h-6 text-red-500 align-middle inline"
+        class="w-4 h-4 text-red-500 align-middle inline"
       />
       by
       <NuxtLink
