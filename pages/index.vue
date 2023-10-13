@@ -4,7 +4,7 @@ const avatarStore = useAvatar()
 const canvas = ref()
 const prompt = ref<string>('')
 const loading = ref(false)
-const picture = ref<string>()
+const picture = ref<string>(process.dev ? '/picture.jpeg' : '')
 const fileInput = ref<HTMLInputElement>()
 const error = ref()
 
