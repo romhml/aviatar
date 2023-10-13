@@ -31,7 +31,6 @@ const generateInput = z.object({
 
 export const avatarRouter = router({
   generate: publicProcedure.input(generateInput).mutation(async ({ input }) => {
-    console.log(input)
     const model = input.model ? models[input.model] : input.mask ? models['stable-diffusion-inpainting'] : models['sdxl']
 
     const output = await replicate.predictions.create({
