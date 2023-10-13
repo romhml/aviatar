@@ -7,31 +7,35 @@ const replicate = new Replicate({
 })
 
 type Model = {
-  version: string
+  tag: string
+  name?: string
 }
 
 const models: Record<string, Model> = {
-  inpaint: {
-    version: 'c11bac58203367db93a3c552bd49a25a5418458ddffb7e90dae55780765e26d6',
+  'stable-diffusion-inpainting': {
+    tag: 'c11bac58203367db93a3c552bd49a25a5418458ddffb7e90dae55780765e26d6',
+    name: 'stability-ai/stable-diffusion-inpainting',
   },
-  vangogh: {
-    version: '2d43b996608bd7d4aba4cacbe9b751399892a9d6cbc27a39f8f49347a3a16f9c',
-  },
+  'sdxl': {
+    tag: 'c221b2b8ef527988fb59bf24a8b97c4561f1c671f73bd389f866bfb27c061316',
+    name: 'stability-ai/sdxl',
+  }
 }
 
 const generateInput = z.object({
   prompt: string(),
   avatar: string().nullish(),
   mask: string().nullish(),
-  model: string().default('inpaint'),
+  model: string().optional(),
 })
 
 export const avatarRouter = router({
   generate: publicProcedure.input(generateInput).mutation(async ({ input }) => {
-    const model = models[input.model] || models.inpaint
+    console.log(input)
+    const model = input.model ? models[input.model] : input.mask ? models['stable-diffusion-inpainting'] : models['sdxl']
 
     const output = await replicate.predictions.create({
-      version: model.version,
+      version: model.tag,
       input: {
         prompt: input.prompt,
         image: input.avatar,

@@ -12,14 +12,6 @@ async function loadFile() {
   fileInput.value?.click()
 }
 
-async function downloadMask() {
-  const mask = await canvas.value.getMask()
-  const el = document.createElement('a')
-  el.href = mask
-  el.download = 'mask.png'
-  el.click()
-  el.remove()
-}
 //
 // async function downloadPicture() {
 //   if (!picture.value) return

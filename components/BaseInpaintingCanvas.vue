@@ -31,6 +31,15 @@ defineExpose({
   },
 
   async getMask() {
+    const canvasData = canvas.value?.toJSON()
+    if (!canvasData.objects.length) return
+
+    // Invert drawing stroke and fill colors
+    canvasData.objects?.forEach((object: any) => {
+      object.stroke = 'white'
+      object.fill = 'white'
+    })
+
     // Create a temporary canvas to generate the mask
     const invertedCanvas = new Canvas('inverted-canvas', {
       isDrawingMode: true,
@@ -38,23 +47,15 @@ defineExpose({
       height: container.value?.clientHeight,
     })
 
-    const canvasData = canvas.value?.toJSON()
-    canvasData.objects?.forEach((object: any) => {
-      object.stroke = 'white'
-      object.fill = 'white'
-    })
-
     await invertedCanvas.loadFromJSON(canvasData, () => {
       invertedCanvas.renderAll()
     })
 
-    invertedCanvas.backgroundColor = canvasData.objects.length
-      ? 'black'
-      : 'white'
+    invertedCanvas.backgroundColor = 'black'
 
     // Export the inverted canvas as a base64 data URL
     const dataURL = invertedCanvas.toDataURL()
-    invertedCanvas.dispose() // Dispose of the inverted canvas
+    invertedCanvas.dispose()
 
     return dataURL
   },
