@@ -1,7 +1,6 @@
 import { inferAsyncReturnType } from '@trpc/server'
-import { H3Event } from 'h3'
 
-export async function createContext(_event: H3Event) {
+export async function createContext() {
   return {}
 }
 

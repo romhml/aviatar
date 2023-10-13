@@ -25,8 +25,6 @@ onMounted(() => {
   }
   // Set up the context for a blur effect
   context.value.lineWidth = 20 // This will be the "size" of the blur effect
-  context.value.shadowBlur = 10 // Adjust the amount of blur
-  context.value.shadowColor = 'black' // Color of the blur effect
 })
 
 function drawLine(
@@ -58,7 +56,7 @@ function onMouseDown(e: MouseEvent) {
   lastPoint = { x, y } // Set the initial point for drawing
 }
 
-function onMouseUp(e: MouseEvent) {
+function onMouseUp() {
   if (!context.value) return
 
   isDrawing.value = false
@@ -138,6 +136,12 @@ defineExpose({
 </script>
 
 <template>
-  <canvas ref="canvas" class="bg-transparent transition duration-100" @mouseup="onMouseUp" @mousedown="onMouseDown"
-    @mousemove="onMouseMove" @mouseleave="onMouseUp" />
+  <canvas
+    ref="canvas"
+    class="bg-transparent transition duration-100"
+    @mouseup="onMouseUp"
+    @mousedown="onMouseDown"
+    @mousemove="onMouseMove"
+    @mouseleave="onMouseUp"
+  />
 </template>

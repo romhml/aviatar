@@ -2,7 +2,6 @@
 useServerSeoMeta({
   title: 'Aviatar',
 })
-
 </script>
 <template>
   <NuxtLayout>

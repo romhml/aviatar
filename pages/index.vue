@@ -1,14 +1,36 @@
 <script setup lang="ts">
+const avatarStore = useAvatar()
+
 const canvas = ref()
 const prompt = ref<string>('')
 const loading = ref(false)
-const picture = ref<string | undefined>()
+const picture = ref<string>()
 const fileInput = ref<HTMLInputElement>()
-const prediction = ref()
+const error = ref()
 
 async function loadFile() {
   fileInput.value?.click()
 }
+
+// async function downloadMask() {
+//   const mask = canvas.value.getMask()
+//   const el = document.createElement('a')
+//   el.href = mask
+//   el.download = 'mask.png'
+//   el.click()
+//   el.remove()
+// }
+//
+// async function downloadPicture() {
+//   if (!picture.value) return
+//
+//   const el = document.createElement('a')
+//   el.href = picture.value
+//   el.download = 'picture.png'
+//
+//   el.click()
+//   el.remove()
+// }
 
 async function updatePicture(event: Event) {
   const file = (event.target as any).files[0]
@@ -25,51 +47,31 @@ async function updatePicture(event: Event) {
 
 async function generate() {
   if (loading.value) return
-
-  const { $client } = useNuxtApp()
-  const reader = new FileReader()
   loading.value = true
-  const blob = await fetch(picture.value as string).then((res) => res.blob())
+  error.value = undefined
 
+  // Read picture as base64 string
+  const reader = new FileReader()
+  const blob = await fetch(picture.value as string).then((res) => res.blob())
   reader.readAsDataURL(blob)
+
   reader.onload = async () => {
     try {
-      prediction.value = await $client.avatar.generate.mutate({
+      await avatarStore.generate({
         prompt: prompt.value,
-        mask: canvas.value.dirty ? canvas.value.getMask() : undefined,
-        avatar: reader.result
+        mask: canvas.value.dirty
+          ? (canvas.value.getMask() as string)
+          : undefined,
+        avatar: reader.result as string,
       })
-
-      await getGenerationResult()
+      picture.value = avatarStore.avatar
     } catch (err) {
       console.error(err)
+      error.value = 'Something went wrong, please try again later.'
     }
-
-    // await new Promise((resolve) => setTimeout(resolve, 1000))
-    // const result = '/picture.jpeg'
 
     loading.value = false
     await canvas.value.clear()
-  }
-}
-
-async function getGenerationResult() {
-  const { $client } = useNuxtApp()
-
-  while (true) {
-    if (prediction.value?.status === 'succeeded') {
-      picture.value = prediction.value?.output[0]
-      prediction.value = undefined
-      break
-    }
-
-    if (prediction.value?.status === 'failed') {
-      prediction.value = undefined
-      break
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 5000))
-    prediction.value = await $client.avatar.generateStatus.query(prediction.value?.id)
   }
 }
 </script>
@@ -79,115 +81,73 @@ async function getGenerationResult() {
     <Transition mode="out-in">
       <div v-if="picture" class="flex flex-col items-center">
         <div class="relative w-80 h-80 overflow-hidden">
-          <img ref="pictureElement" :src="picture" class="absolute inset-0 select-none pointer-events-none rounded" />
-          <Canvas ref="canvas" class="absolute w-full h-full cursor-pointer" />
+          <img
+            ref="pictureElement"
+            :src="picture"
+            class="absolute inset-0 select-none pointer-events-none rounded"
+          />
+          <BaseInpaintingCanvas ref="canvas" class="absolute w-full h-full" />
           <Transition mode="in-out">
-            <div v-if="loading" class="bg" />
+            <BaseNoise v-if="loading" />
           </Transition>
         </div>
       </div>
 
-      <div v-else
+      <div
+        v-else
         class="bg-zinc-100 border border-dashed border-zinc-200 rounded w-80 h-80 cursor-pointer flex items-center justify-center"
-        @click="loadFile">
+        @click="loadFile"
+      >
         <p class="text-center text-zinc-400 text-sm">Upload your picture</p>
       </div>
     </Transition>
 
     <div
       class="flex space-x-4 rounded-full bg-white pl-4 pr-2 py-2 border border-zinc-200 items-center w-full max-w-md shadow-lg mt-8"
-      @keydown.enter="generate()">
-      <input v-model="prompt" :rows="1"
+      @keydown.enter="generate()"
+    >
+      <input
+        v-model="prompt"
+        :rows="1"
         class="outline-none resize-none w-full placeholder:text-zinc-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
-        placeholder="Imagine something..." :disabled="loading || !picture" />
+        placeholder="Imagine something..."
+        :disabled="loading || !picture"
+      />
       <button
         class="rounded-full bg-black text-white w-7 h-7 flex items-center justify-center flex-none disabled:opacity-50 disabled:cursor-not-allowed transition"
-        @click="generate()" :disabled="loading || !picture">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-          class="w-5 h-5">
-          <path stroke-linejoin="round" d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75" />
+        :disabled="loading || !picture"
+        @click="generate()"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-5 h-5"
+        >
+          <path
+            stroke-linejoin="round"
+            d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
+          />
         </svg>
       </button>
     </div>
+    <p v-if="error" class="text-red-500 text-sm mt-2">
+      {{ error }}
+    </p>
 
-    <Transition>
-      <div v-if="picture && !loading" class="flex space-x-4 justify-between">
-        <button v-if="picture" class="underline text-zinc-400 text-sm mt-4" @click="loadFile">
-          Change
-        </button>
-        <button v-if="picture" class="underline text-zinc-400 text-sm mt-4" @click="canvas.clear()">
-          Clear
-        </button>
-        <a v-if="picture" :href="picture" target="_blank" class="underline text-zinc-400 text-sm mt-4">Download</a>
-      </div>
-    </Transition>
-
-    <input ref="fileInput" type="file" class="hidden" accept="image/png image/jpg" @input="updatePicture" />
+    <input
+      ref="fileInput"
+      type="file"
+      class="hidden"
+      accept="image/png image/jpg"
+      @input="updatePicture"
+    />
   </div>
 </template>
 
 <style>
-.bg {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  right: -50%;
-  bottom: -50%;
-  width: 200%;
-  height: 200%;
-  background: transparent url('/noise.png') repeat 0 0;
-  background-repeat: repeat;
-  animation: bg-animation 0.2s infinite ease-in-out;
-  opacity: 0.9;
-  visibility: visible;
-}
-
-@keyframes bg-animation {
-  0% {
-    transform: translate(0, 0);
-  }
-
-  10% {
-    transform: translate(-5%, -5%);
-  }
-
-  20% {
-    transform: translate(-10%, 5%);
-  }
-
-  30% {
-    transform: translate(5%, -10%);
-  }
-
-  40% {
-    transform: translate(-5%, 15%);
-  }
-
-  50% {
-    transform: translate(-10%, 5%);
-  }
-
-  60% {
-    transform: translate(15%, 0);
-  }
-
-  70% {
-    transform: translate(0, 10%);
-  }
-
-  80% {
-    transform: translate(-15%, 0);
-  }
-
-  90% {
-    transform: translate(10%, 5%);
-  }
-
-  100% {
-    transform: translate(5%, 0);
-  }
-}
-
 .v-enter-active,
 .v-leave-active {
   transition: opacity 0.3s ease-in-out;

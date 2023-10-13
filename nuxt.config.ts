@@ -1,8 +1,15 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   devtools: { enabled: true },
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: [
+    '@nuxtjs/tailwindcss',
+    'nuxt-icon',
+    ['@pinia/nuxt', { autoImports: ['defineStore', 'acceptHMRUpdate'] }],
+  ],
 
+  imports: {
+    dirs: ['stores'],
+  },
   build: {
     transpile: ['trpc-nuxt'],
   },
