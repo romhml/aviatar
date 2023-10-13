@@ -116,6 +116,7 @@ async function generate() {
       />
       <button
         class="rounded-full bg-black text-white w-7 h-7 flex items-center justify-center flex-none"
+        :class="{ 'animate-pulse': loading }"
         :disabled="loading || !picture"
         @click="generate()"
       >
@@ -146,7 +147,7 @@ async function generate() {
 <style>
 .v-enter-active,
 .v-leave-active {
-  transition: opacity 0.1s ease-in;
+  transition: opacity 0.1s;
 }
 
 .v-enter-from,
