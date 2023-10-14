@@ -82,7 +82,7 @@ async function generate() {
 
 <template>
   <div class="flex flex-col items-center py-8">
-    <BaseModelPicker v-model="model" :options="models" class="mb-4" />
+    <BaseModelPicker v-model="model" :options="models" class="mb-6" />
 
     <Transition mode="out-in">
       <div v-if="picture" class="flex flex-col items-center">
@@ -108,7 +108,7 @@ async function generate() {
     </Transition>
 
     <div
-      class="mt-8 flex w-full max-w-md items-center space-x-4 rounded-full border border-zinc-200 bg-white py-2 pl-4 pr-2 shadow-lg transition"
+      class="mt-6 flex w-full max-w-md items-center space-x-4 rounded-full border border-zinc-200 bg-white py-2 pl-4 pr-2 shadow-lg transition"
       :class="{ 'cursor-not-allowed opacity-50': loading }"
     >
       <input
