@@ -35,8 +35,10 @@ export const avatarRouter = router({
   }),
 
   // Note: Would be better to use replicate webhooks and websockets but that's not currently possible with Nuxt
-  generateStatus: publicProcedure.input(string()).query(async ({ input }) => {
-    const output = await replicate.predictions.get(input)
-    return output
-  }),
+  generateTaskStatus: publicProcedure
+    .input(string())
+    .query(async ({ input }) => {
+      const output = await replicate.predictions.get(input)
+      return output
+    }),
 })

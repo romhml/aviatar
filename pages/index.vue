@@ -121,7 +121,7 @@ async function generate() {
       <button
         class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-black text-white"
         :class="{ 'animate-pulse': loading }"
-        :disabled="loading || !picture"
+        :disabled="loading"
         @click="generate()"
       >
         <Transition mode="out-in">

@@ -41,7 +41,7 @@ const onUpdate = (key: string) => {
     <Transition>
       <div
         v-if="toggled"
-        class="absolute left-1/2 top-16 z-50 grid w-[20rem] sm:w-[30rem] -translate-x-1/2 transform grid-cols-2 gap-4 rounded-lg border border-zinc-300 bg-white px-4 py-2 shadow-lg sm:grid-cols-3"
+        class="absolute left-1/2 top-16 z-50 grid w-[20rem] -translate-x-1/2 transform grid-cols-2 gap-4 rounded-lg border border-zinc-300 bg-white px-4 py-2 shadow-lg sm:w-[30rem] sm:grid-cols-3"
       >
         <div
           v-for="(model, key) in options"
