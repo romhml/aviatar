@@ -64,7 +64,7 @@ defineExpose({
 
 <template>
   <div ref="container" class="relative">
-    <img :src="props.image" class="absolute" />
+    <img :src="props.image" class="absolute rounded" />
     <canvas id="canvas" class="absolute" />
   </div>
 </template>

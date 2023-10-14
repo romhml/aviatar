@@ -22,11 +22,12 @@ export const avatarRouter = router({
       version: model.tag,
       input: {
         prompt: input.prompt,
+        negative_prompt: 'ugly, broken, disfigured, people',
         image: input.avatar,
         mask: input.mask,
         width: 512,
         height: 512,
-        numInferenceSteps: 200,
+        num_inference_steps: 100,
       },
     })
 
