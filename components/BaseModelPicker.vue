@@ -4,6 +4,7 @@ import { Model } from '@/models'
 const props = defineProps<{
   modelValue: string
   options: Record<string, Model>
+  disabled?: boolean
 }>()
 
 const currentModel = computed(() => props.options[props.modelValue])
@@ -11,7 +12,12 @@ const toggled = ref(false)
 
 const emit = defineEmits(['update:modelValue'])
 
-const onUpdate = (key: string) => {
+function toggle() {
+  if (props.disabled) return
+  toggled.value = !toggled.value
+}
+
+function onUpdate(key: string) {
   emit('update:modelValue', key)
   toggled.value = false
 }
@@ -20,9 +26,14 @@ const onUpdate = (key: string) => {
 <template>
   <div class="relative">
     <div
-      class="flex w-[15rem] cursor-pointer items-center space-x-2 rounded-full border border-zinc-300 bg-white p-1 transition transition ease-in"
-      :class="toggled ? 'shadow-lg' : 'hover:shadow-lg'"
-      @click="toggled = !toggled"
+      class="flex w-[15rem] items-center space-x-2 rounded-full border border-zinc-300 bg-white p-1 transition transition ease-in"
+      :class="{
+        'shadow-lg': toggled,
+        'hover:shadow-lg': !toggled && !disabled,
+        'cursor-not-allowed opacity-50': disabled,
+        'cursor-pointer': !disabled,
+      }"
+      @click="toggle"
     >
       <img
         :src="currentModel.picture"

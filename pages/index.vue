@@ -82,10 +82,18 @@ async function generate() {
 
 <template>
   <div class="flex flex-col items-center py-8">
-    <BaseModelPicker v-model="model" :options="models" class="mb-6" />
+    <BaseModelPicker
+      v-model="model"
+      :options="models"
+      :disabled="loading"
+      class="mb-6"
+    />
 
     <Transition mode="out-in">
-      <div v-if="picture" class="flex flex-col items-center">
+      <div
+        v-if="picture"
+        class="flex flex-col items-center"
+      >
         <div class="relative h-80 w-80 overflow-hidden">
           <BaseInpaintingCanvas
             ref="canvas"
@@ -113,13 +121,13 @@ async function generate() {
     >
       <input
         v-model="prompt"
-        class="w-full resize-none outline-none placeholder:text-zinc-300 disabled:bg-white"
+        class="w-full resize-none outline-none placeholder:text-zinc-300 disabled:cursor-not-allowed disabled:bg-white"
         placeholder="Imagine something..."
         :disabled="loading"
         @keydown.enter="generate()"
       />
       <button
-        class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-black text-white"
+        class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-black text-white disabled:cursor-not-allowed"
         :class="{ 'animate-pulse': loading }"
         :disabled="loading"
         @click="generate()"
@@ -130,11 +138,17 @@ async function generate() {
             name="humbleicons:spinner-earring"
             class="animate-spin"
           />
-          <Icon v-else name="heroicons:arrow-right" />
+          <Icon
+            v-else
+            name="heroicons:arrow-right"
+          />
         </Transition>
       </button>
     </div>
-    <p v-if="error" class="mt-2 text-sm text-red-500">
+    <p
+      v-if="error"
+      class="mt-2 text-sm text-red-500"
+    >
       {{ error }}
     </p>
     <input
