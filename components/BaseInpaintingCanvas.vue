@@ -11,7 +11,11 @@ const container = ref<HTMLElement>()
 // Function to set up the canvas context
 onMounted(() => {
   canvas.value = new Canvas('canvas', {
-    isDrawingMode: true,
+    isDrawingMode: false,
+    selection: false,
+    stopContextMenu: true,
+    skipTargetFind: true,
+
     width: container.value?.clientWidth,
     height: container.value?.clientHeight,
   })
@@ -59,6 +63,35 @@ defineExpose({
 
     return dataURL
   },
+
+  toggleDrawing() {
+    if (!canvas.value) return
+    canvas.value.isDrawingMode = !canvas.value?.isDrawingMode
+  },
+
+  drawing: computed(() => canvas.value?.isDrawingMode),
+
+  undo() {
+    if (!canvas.value) return
+    const objects = canvas.value.getObjects()
+    if (!objects.length) return
+
+    canvas.value.remove(objects[objects.length - 1])
+  },
+
+  redo() {
+    if (!canvas.value) return
+    const objects = canvas.value.getObjects()
+    if (!objects.length) return
+
+    canvas.value.add(objects[objects.length - 1])
+  },
+
+  dirty: computed(() => {
+    if (!canvas.value) return false
+    const objects = canvas.value.getObjects()
+    return !!objects.length
+  }),
 })
 </script>
 

@@ -8,24 +8,27 @@ const prompt = ref<string>('')
 const model = ref<string>('sdxl')
 
 const loading = ref(false)
-const picture = ref<string>()
 const fileInput = ref<HTMLInputElement>()
 const error = ref()
+const picture = ref<string>()
+onMounted(() => {
+  picture.value = avatarStore.avatar
+})
 
-async function loadFile() {
+async function uploadPicture() {
   fileInput.value?.click()
 }
 
-// async function downloadPicture() {
-//   if (!picture.value) return
-//
-//   const el = document.createElement('a')
-//   el.href = picture.value
-//   el.download = 'picture.png'
-//
-//   el.click()
-//   el.remove()
-// }
+async function downloadPicture() {
+  if (!picture.value) return
+
+  const el = document.createElement('a')
+  el.href = picture.value
+  el.download = 'picture.png'
+
+  el.click()
+  el.remove()
+}
 
 async function updatePicture(event: Event) {
   const file = (event.target as any).files[0]
@@ -109,12 +112,39 @@ async function generate() {
       <div
         v-else
         class="flex h-80 w-80 cursor-pointer items-center justify-center rounded border border-dashed border-zinc-200 bg-zinc-100"
-        @click="loadFile"
+        @click="uploadPicture"
       >
         <p class="text-center text-sm text-zinc-400">Upload your picture</p>
       </div>
     </Transition>
 
+    <div
+      v-if="canvas"
+      class="mt-2 flex w-80 justify-between py-1"
+    >
+      <div class="flex space-x-2">
+        <BaseCanvasButton
+          icon="heroicons:paint-brush"
+          :active="canvas.drawing"
+          @click="canvas.toggleDrawing()"
+        />
+        <BaseCanvasButton
+          icon="heroicons:arrow-path"
+          :disabled="!canvas.dirty"
+          @click="canvas.clear()"
+        />
+      </div>
+      <div class="flex space-x-2">
+        <BaseCanvasButton
+          icon="heroicons:photo"
+          @click="uploadPicture()"
+        />
+        <BaseCanvasButton
+          icon="heroicons:arrow-down-tray"
+          @click="downloadPicture()"
+        />
+      </div>
+    </div>
     <div
       class="mt-6 flex w-full max-w-md items-center space-x-4 rounded-full border border-zinc-200 bg-white py-2 pl-4 pr-2 shadow-lg transition"
       :class="{ 'cursor-not-allowed opacity-50': loading }"
