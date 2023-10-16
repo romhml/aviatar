@@ -11,15 +11,14 @@ const model = ref<string>('sdxl')
 const loading = ref(false)
 const fileInput = ref<HTMLInputElement>()
 const error = ref()
+
 const picture = ref<string>()
 const masonry = ref<MiniMasonry>()
 
 onMounted(async () => {
   masonry.value = new MiniMasonry({
     container: '.masonry',
-    gutter: 8,
-    gutterX: 8,
-    gutterY: 8,
+    gutter: 10,
   })
 })
 
@@ -36,7 +35,6 @@ async function updatePicture(event: Event) {
     picture.value = reader.result as string
     canvas.value?.clear()
   }
-
   if (fileInput.value) fileInput.value.value = ''
 }
 
@@ -45,41 +43,29 @@ async function generate() {
   loading.value = true
   error.value = undefined
 
+  const image = await canvas.value?.getImage()
+
   // Read picture as base64 string
-  if (picture.value) {
-    const reader = new FileReader()
-    const blob = await fetch(picture.value as string).then((res) => res.blob())
-    reader.readAsDataURL(blob)
-
-    reader.onload = async () => {
-      try {
-        await avatarStore.generate({
-          prompt: prompt.value,
-          mask: await canvas.value?.getMask(),
-          image: reader.result as string,
-          model: model.value,
-        })
-      } catch (err) {
-        console.error(err)
-        error.value = 'Something went wrong, please try again later.'
-      }
-      loading.value = false
-
-      await canvas.value.clear()
-    }
-  } else {
+  try {
     await avatarStore.generate({
       prompt: prompt.value,
       mask: await canvas.value?.getMask(),
+      image,
       model: model.value,
+      width: canvas.value?.getWidth(),
+      height: canvas.value?.getHeight(),
     })
-
-    loading.value = false
+  } catch (err) {
+    console.error(err)
+    error.value = 'Something went wrong, please try again later.'
   }
+  loading.value = false
 }
 
 async function removeBackground() {
   if (!picture.value) return
+  await canvas.value?.clear()
+
   loading.value = true
   const { output } = await avatarStore.removeBackground({
     image: picture.value,
@@ -103,28 +89,31 @@ async function removeBackground() {
         v-if="picture"
         class="flex flex-col items-center"
       >
-        <div class="relative h-72 w-72 overflow-hidden">
+        <div class="relative overflow-hidden rounded">
           <BaseInpaintingCanvas
             ref="canvas"
             :image="picture"
-            class="absolute h-full w-full"
           />
+
           <Transition mode="in-out">
-            <BaseNoise v-if="loading" />
+            <BaseNoise
+              v-if="loading"
+              class="absolute top-0"
+            />
           </Transition>
         </div>
       </div>
 
       <div
         v-else
-        class="flex h-72 w-72 cursor-pointer items-center justify-center rounded border border-dashed border-zinc-200 bg-zinc-100"
+        class="flex h-80 w-80 cursor-pointer items-center justify-center rounded border border-dashed border-zinc-200 bg-zinc-100"
         @click="uploadPicture"
       >
         <p class="text-center text-sm text-zinc-400">Upload your picture</p>
       </div>
     </Transition>
 
-    <div class="mt-2 flex w-72 justify-between">
+    <div class="mt-2 flex w-80 justify-between px-2">
       <div class="flex space-x-2">
         <BaseCanvasButton
           icon="heroicons:paint-brush"
@@ -195,22 +184,34 @@ async function removeBackground() {
       accept="image/png, image/jpg"
       @input="updatePicture"
     />
+
     <div class="masonry relative mt-6 w-full">
-      <div
-        v-for="img in avatarStore.history"
-        :key="img"
-        class="absolute"
-      >
-        <BaseOutputImage
-          :src="img"
-          @load="masonry?.layout()"
-        />
-      </div>
+      <ClientOnly>
+        <div
+          v-for="img in avatarStore.history"
+          :key="img"
+          class="absolute"
+        >
+          <BaseOutputImage
+            :src="img"
+            @load="masonry?.layout()"
+          />
+        </div>
+        <template #fallback>
+          <div class="flex flex-wrap gap-4">
+            <div
+              v-for="img in avatarStore.history"
+              :key="img"
+              class="flex h-80 w-80 items-center justify-center rounded bg-zinc-100"
+            />
+          </div>
+        </template>
+      </ClientOnly>
     </div>
   </div>
 </template>
 
-<style>
+<style lang="postcss">
 * {
   @apply antialiased;
 }

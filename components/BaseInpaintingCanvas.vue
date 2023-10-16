@@ -1,29 +1,54 @@
 <script setup lang="ts">
-import { Canvas, PencilBrush } from 'fabric'
+import { Canvas, PencilBrush, Image, Path } from 'fabric'
 
 const props = defineProps<{
   image: string
 }>()
 
 const canvas = ref<Canvas>()
-const container = ref<HTMLElement>()
+const img = ref<Image>()
 
 // Function to set up the canvas context
-onMounted(() => {
+onMounted(async () => {
   canvas.value = new Canvas('canvas', {
     isDrawingMode: false,
     selection: false,
     stopContextMenu: true,
     skipTargetFind: true,
-
-    width: container.value?.clientWidth,
-    height: container.value?.clientHeight,
   })
-
   canvas.value.freeDrawingBrush = new PencilBrush(canvas.value)
   canvas.value.freeDrawingBrush.width = 20
   canvas.value.freeDrawingBrush.color = 'black'
+
+  await updateImage()
 })
+
+async function updateImage() {
+  if (!canvas.value) return
+  if (img.value) {
+    try {
+      img.value?.dispose()
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  img.value = await Image.fromURL(props.image, {}, {})
+  img.value.scaleToWidth(canvas.value.width)
+
+  canvas.value.setDimensions({
+    width: img.value?.width * img.value?.scaleX,
+    height: img.value?.height * img.value?.scaleY,
+  })
+  canvas.value?.add(img.value)
+}
+
+watch(
+  () => props.image,
+  async () => {
+    await updateImage()
+  },
+)
 
 onUnmounted(() => {
   canvas.value?.dispose()
@@ -31,27 +56,33 @@ onUnmounted(() => {
 
 defineExpose({
   async clear() {
-    canvas.value?.clear()
+    canvas.value?.getObjects().forEach((o) => {
+      if (o instanceof Path) {
+        canvas.value?.remove(o)
+      }
+    })
   },
 
   async getMask() {
     const canvasData = canvas.value?.toJSON()
-    if (!canvasData.objects.length) return
 
     // Invert drawing stroke and fill colors
-    canvasData.objects?.forEach((object: any) => {
-      object.stroke = 'white'
-      object.fill = 'white'
-    })
+    const invertedStrokes = canvasData.objects
+      ?.filter((o: any) => o.type === 'Path')
+      .map((o: any) => {
+        return { ...o, stroke: 'white', fill: 'white' }
+      })
+
+    if (!invertedStrokes.length) return
 
     // Create a temporary canvas to generate the mask
     const invertedCanvas = new Canvas('inverted-canvas', {
       isDrawingMode: true,
-      width: container.value?.clientWidth,
-      height: container.value?.clientHeight,
+      width: canvas.value?.width,
+      height: canvas.value?.height,
     })
 
-    await invertedCanvas.loadFromJSON(canvasData, () => {
+    await invertedCanvas.loadFromJSON({ objects: invertedStrokes }, () => {
       invertedCanvas.renderAll()
     })
 
@@ -62,6 +93,18 @@ defineExpose({
     invertedCanvas.dispose()
 
     return dataURL
+  },
+
+  async getImage() {
+    return img.value?.toDataURL()
+  },
+
+  getWidth() {
+    return canvas.value?.width
+  },
+
+  getHeight() {
+    return canvas.value?.height
   },
 
   toggleDrawing() {
@@ -96,17 +139,8 @@ defineExpose({
 </script>
 
 <template>
-  <div
-    ref="container"
-    class="relative"
-  >
-    <nuxt-img
-      :src="props.image"
-      class="absolute rounded"
-    />
-    <canvas
-      id="canvas"
-      class="absolute"
-    />
-  </div>
+  <canvas
+    id="canvas"
+    class="rounded"
+  />
 </template>

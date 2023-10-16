@@ -19,20 +19,20 @@ const hovered = ref(false)
 
 <template>
   <div
-    class="relative cursor-pointer"
+    class="relative cursor-pointer overflow-hidden rounded shadow-xl"
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
   >
     <nuxt-img
       v-bind="$attrs"
       :src="src"
-      class="rounded"
+      class="h-full w-full"
     />
 
     <Transition>
       <div
         v-if="hovered"
-        class="absolute top-0 z-50 flex h-full w-full items-end justify-end rounded bg-black/40 p-2"
+        class="absolute top-0 z-50 flex h-full w-full items-end justify-end bg-black/40 p-2"
       >
         <Icon
           name="heroicons:arrow-down-tray"

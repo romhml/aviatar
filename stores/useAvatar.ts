@@ -20,6 +20,8 @@ export const useAvatar = defineStore('avatar', {
       mask?: string
       image?: string
       model?: string
+      width: number
+      height: number
     }) {
       const { $client } = useNuxtApp()
       this.generateTask = await $client.avatar.generate.mutate(input)
