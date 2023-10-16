@@ -37,7 +37,7 @@ function onUpdate(key: string) {
     >
       <img
         :src="currentModel.picture"
-        class="pointer-events-none h-12 w-12 flex-none rounded-full object-cover transition"
+        class="pointer-events-none h-10 w-10 flex-none rounded-full object-cover transition"
       />
       <div class="w-full overflow-hidden pr-4 transition">
         <p class="text-sm font-medium transition">{{ currentModel?.label }}</p>

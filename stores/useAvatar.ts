@@ -42,7 +42,7 @@ export const useAvatar = defineStore('avatar', {
 
         if (this.generateTask.status === 'succeeded') {
           const output = this.generateTask.output as string[]
-          this.history.unshift(output[0])
+          this.history.push(output[0])
           this.generateTask = null
 
           break
