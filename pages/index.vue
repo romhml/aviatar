@@ -203,7 +203,7 @@ async function removeBackground() {
       >
         <BaseOutputImage
           :src="img"
-          @load="masonry.layout()"
+          @load="masonry?.layout()"
         />
       </div>
     </div>
