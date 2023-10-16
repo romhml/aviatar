@@ -100,7 +100,7 @@ defineExpose({
     ref="container"
     class="relative"
   >
-    <img
+    <nuxt-img
       :src="props.image"
       class="absolute rounded"
     />

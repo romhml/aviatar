@@ -60,10 +60,10 @@ function onUpdate(key: string) {
           class="flex cursor-pointer flex-col items-center justify-center space-y-2 rounded-lg px-2 py-4 text-center transition hover:bg-zinc-100"
           @click="onUpdate(key)"
         >
-          <img
+          <nuxt-img
             :src="model.picture"
             class="pointer-events-none h-10 w-10 rounded-full object-cover"
-            loading="eager"
+            preload
           />
           <div>
             <p class="text-sm font-medium">{{ model?.label }}</p>

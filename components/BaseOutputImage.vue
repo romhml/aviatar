@@ -23,7 +23,7 @@ const hovered = ref(false)
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
   >
-    <img
+    <nuxt-img
       v-bind="$attrs"
       :src="src"
       class="rounded"
