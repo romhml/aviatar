@@ -24,9 +24,11 @@ const hovered = ref(false)
     @mouseleave="hovered = false"
   >
     <img
+      v-bind="$attrs"
       :src="src"
       class="rounded"
     />
+
     <Transition>
       <div
         v-if="hovered"

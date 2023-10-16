@@ -6,7 +6,6 @@ export default defineNuxtConfig({
     'nuxt-icon',
     ['@pinia/nuxt', { autoImports: ['defineStore', 'acceptHMRUpdate'] }],
     '@pinia-plugin-persistedstate/nuxt',
-    'nuxt-swiper',
   ],
 
   imports: {

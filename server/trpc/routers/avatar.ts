@@ -9,9 +9,13 @@ const replicate = new Replicate({
 
 const generateInput = z.object({
   prompt: string(),
-  avatar: string().nullish(),
+  image: string().nullish(),
   mask: string().nullish(),
   model: string().optional(),
+})
+
+const removeBackgroundInput = z.object({
+  image: string(),
 })
 
 export const avatarRouter = router({
@@ -23,7 +27,7 @@ export const avatarRouter = router({
       input: {
         prompt: input.prompt,
         negative_prompt: 'ugly, broken, disfigured, people',
-        image: input.avatar,
+        image: input.image,
         mask: input.mask,
         width: 512,
         height: 512,
@@ -40,5 +44,20 @@ export const avatarRouter = router({
     .query(async ({ input }) => {
       const output = await replicate.predictions.get(input)
       return output
+    }),
+
+  removeBackground: publicProcedure
+    .input(removeBackgroundInput)
+    .mutation(async ({ input }) => {
+      const output = await replicate.run(
+        'cjwbw/rembg:fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003',
+        {
+          input: {
+            image: input.image,
+          },
+        },
+      )
+
+      return { output: output as unknown as string }
     }),
 })

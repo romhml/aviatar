@@ -1,6 +1,5 @@
 type AvatarState = {
   history: string[]
-  currentVersion: number
   generateTask: any
 }
 
@@ -11,20 +10,15 @@ export const useAvatar = defineStore('avatar', {
   state: () =>
     ({
       history: [],
-      currentVersion: 0,
       currentModel: 'barbie',
       generateTask: null,
     }) as AvatarState,
-
-  getters: {
-    avatar: (state) => state.history[state.currentVersion],
-  },
 
   actions: {
     async generate(input: {
       prompt: string
       mask?: string
-      avatar?: string
+      image?: string
       model?: string
     }) {
       const { $client } = useNuxtApp()
@@ -42,7 +36,7 @@ export const useAvatar = defineStore('avatar', {
 
         if (this.generateTask.status === 'succeeded') {
           const output = this.generateTask.output as string[]
-          this.history.push(output[0])
+          this.history.unshift(output[0])
           this.generateTask = null
 
           break
@@ -57,6 +51,11 @@ export const useAvatar = defineStore('avatar', {
           this.generateTask.id,
         )
       }
+    },
+
+    async removeBackground(input: { image: string }) {
+      const { $client } = useNuxtApp()
+      return await $client.avatar.removeBackground.mutate(input)
     },
   },
 })

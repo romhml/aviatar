@@ -63,6 +63,7 @@ function onUpdate(key: string) {
           <img
             :src="model.picture"
             class="pointer-events-none h-10 w-10 rounded-full object-cover"
+            loading="eager"
           />
           <div>
             <p class="text-sm font-medium">{{ model?.label }}</p>
