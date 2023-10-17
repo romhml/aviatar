@@ -70,7 +70,6 @@ async function removeBackground() {
     <BaseInputModelSelect
       v-model="model"
       :options="diffusionModels"
-      :disabled="loading"
       class="mb-6"
     />
 
