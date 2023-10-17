@@ -6,7 +6,7 @@ const props = defineProps<{
 async function download() {
   const a = document.createElement('a')
   const blob = await fetch(props.src).then((res) => res.blob())
-  a.href = URL.createObjectURL(blob)
+  a.href = URL.createObjectURL(blob) ?? ''
   a.download = 'image.png'
 
   a.click()

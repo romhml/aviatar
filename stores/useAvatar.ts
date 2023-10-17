@@ -16,7 +16,7 @@ export const useAvatar = defineStore('avatar', {
 
   actions: {
     async generate(input: {
-      prompt: string
+      prompt?: string
       mask?: string
       image?: string
       model?: string

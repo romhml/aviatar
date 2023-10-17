@@ -16,15 +16,23 @@ onMounted(async () => {
     stopContextMenu: true,
     skipTargetFind: true,
   })
+
+  // Set up the pencil brush
   canvas.value.freeDrawingBrush = new PencilBrush(canvas.value)
   canvas.value.freeDrawingBrush.width = 20
   canvas.value.freeDrawingBrush.color = 'black'
 
-  await updateImage()
+  await updateCanvasImage()
 })
 
-async function updateImage() {
+onUnmounted(() => {
+  canvas.value?.dispose()
+})
+
+// Updates the image and resize the canvas to fit the new image
+async function updateCanvasImage() {
   if (!canvas.value) return
+  // Dispose the previous image
   if (img.value) {
     try {
       img.value?.dispose()
@@ -46,13 +54,9 @@ async function updateImage() {
 watch(
   () => props.image,
   async () => {
-    await updateImage()
+    await updateCanvasImage()
   },
 )
-
-onUnmounted(() => {
-  canvas.value?.dispose()
-})
 
 defineExpose({
   async clear() {

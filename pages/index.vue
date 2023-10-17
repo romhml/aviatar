@@ -5,15 +5,14 @@ import MiniMasonry from 'minimasonry'
 const avatarStore = useAvatar()
 
 const canvas = ref()
-const prompt = ref<string>('')
-const model = ref<string>('sdxl')
-
 const loading = ref(false)
 const fileInput = ref<HTMLInputElement>()
-const error = ref()
-
-const picture = ref<string>()
 const masonry = ref<MiniMasonry>()
+
+const prompt = ref<string>()
+const model = ref<string>('sdxl')
+const error = ref()
+const picture = ref<string>()
 
 onMounted(async () => {
   masonry.value = new MiniMasonry({
@@ -21,22 +20,6 @@ onMounted(async () => {
     gutter: 10,
   })
 })
-
-async function uploadPicture() {
-  fileInput.value?.click()
-}
-
-async function updatePicture(event: Event) {
-  const file = (event.target as any).files[0]
-  const reader = new FileReader()
-
-  reader.readAsDataURL(file)
-  reader.onload = () => {
-    picture.value = reader.result as string
-    canvas.value?.clear()
-  }
-  if (fileInput.value) fileInput.value.value = ''
-}
 
 async function generate() {
   if (loading.value) return
@@ -59,24 +42,26 @@ async function generate() {
     console.error(err)
     error.value = 'Something went wrong, please try again later.'
   }
+
   loading.value = false
 }
 
 async function removeBackground() {
-  if (!picture.value) return
+  if (!picture.value || loading.value) return
   await canvas.value?.clear()
 
   loading.value = true
   const { output } = await avatarStore.removeBackground({
     image: picture.value,
   })
+
   picture.value = output
   loading.value = false
 }
 </script>
 
 <template>
-  <div class="flex flex-col items-center overflow-visible px-8 py-4">
+  <div class="flex flex-col items-center overflow-visible py-4">
     <BaseModelPicker
       v-model="model"
       :options="models"
@@ -89,30 +74,18 @@ async function removeBackground() {
         v-if="picture"
         class="flex flex-col items-center"
       >
-        <div class="relative overflow-hidden rounded">
-          <BaseInpaintingCanvas
-            ref="canvas"
-            :image="picture"
-          />
-
-          <Transition mode="in-out">
-            <BaseNoise
-              v-if="loading"
-              class="absolute top-0"
-            />
-          </Transition>
-        </div>
+        <BaseInpaintingCanvas
+          ref="canvas"
+          :image="picture"
+        />
       </div>
-
-      <div
+      <BaseFileInput
         v-else
-        class="flex h-80 w-80 cursor-pointer items-center justify-center rounded border border-dashed border-zinc-200 bg-zinc-100"
-        @click="uploadPicture"
-      >
-        <p class="text-center text-sm text-zinc-400">Upload your picture</p>
-      </div>
+        ref="fileInput"
+        v-model="picture"
+        accept="image/png, image/jpg"
+      />
     </Transition>
-
     <div class="mt-2 flex w-80 justify-between px-2">
       <div class="flex space-x-2">
         <BaseCanvasButton
@@ -136,7 +109,7 @@ async function removeBackground() {
         <BaseCanvasButton
           :disabled="!canvas || loading"
           icon="heroicons:photo"
-          @click="uploadPicture()"
+          @click="fileInput?.click()"
         />
       </div>
     </div>
@@ -147,10 +120,11 @@ async function removeBackground() {
     >
       <input
         v-model="prompt"
+        href=""
         class="w-full resize-none outline-none placeholder:text-zinc-300 disabled:cursor-not-allowed disabled:bg-white"
         placeholder="Imagine something..."
         :disabled="loading"
-        @keydown.enter="generate()"
+        @keydown.enter.exact="generate()"
       />
       <button
         class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-black text-white disabled:cursor-not-allowed"
@@ -177,13 +151,6 @@ async function removeBackground() {
     >
       {{ error }}
     </p>
-    <input
-      ref="fileInput"
-      type="file"
-      class="hidden"
-      accept="image/png, image/jpg"
-      @input="updatePicture"
-    />
 
     <div class="masonry relative mt-6 w-full">
       <ClientOnly>
@@ -198,11 +165,11 @@ async function removeBackground() {
           />
         </div>
         <template #fallback>
-          <div class="flex flex-wrap gap-4">
+          <div class="flex flex-wrap justify-center gap-4">
             <div
-              v-for="img in avatarStore.history"
-              :key="img"
-              class="flex h-80 w-80 items-center justify-center rounded bg-zinc-100"
+              v-for="i in 10"
+              :key="i"
+              class="flex h-80 w-80 animate-pulse items-center justify-center rounded bg-zinc-100"
             />
           </div>
         </template>

@@ -1,5 +1,5 @@
 <template>
-  <footer class="px-8 py-2 text-center align-middle text-xs">
+  <footer class="px-8 py-4 text-center align-middle text-xs">
     <p>
       Made with
       <Icon

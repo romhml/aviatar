@@ -8,7 +8,7 @@ const replicate = new Replicate({
 })
 
 const generateInput = z.object({
-  prompt: z.string(),
+  prompt: z.string().nullish(),
   image: z.string().nullish(),
   mask: z.string().nullish(),
   model: z.string().optional(),
@@ -42,7 +42,6 @@ export const avatarRouter = router({
         width: input.width - (input.width % 8),
       },
     })
-
     return output
   }),
 
