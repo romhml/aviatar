@@ -22,6 +22,14 @@ async function download() {
 }
 
 const hovered = ref(false)
+
+onMounted(async () => {
+  await props.onLoad?.()
+})
+
+onUnmounted(async () => {
+  await props.onLoad?.()
+})
 </script>
 
 <template>
@@ -43,14 +51,14 @@ const hovered = ref(false)
     >
       <nuxt-img
         :src="image"
-        class="h-full w-80 w-full"
+        class="h-full w-full"
         @load="onLoad"
       />
       <BaseNoise class="absolute top-0" />
     </div>
     <div
       v-else
-      class="relative flex h-72 w-full flex-col items-center justify-center overflow-hidden bg-black"
+      class="relative flex h-64 w-full flex-col items-center justify-center overflow-hidden bg-black"
     >
       <BaseNoise class="absolute top-0" />
     </div>

@@ -41,6 +41,7 @@ export const avatarRouter = router({
         mask: input.mask,
         height: height,
         width: width,
+        num_inference_steps: 100,
       },
     })
     return output

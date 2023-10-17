@@ -6,7 +6,7 @@ const avatarStore = useAvatar()
 
 const canvas = ref()
 const loading = ref(false)
-const fileInput = ref<HTMLInputElement>()
+const fileInput = ref()
 const masonry = ref<MiniMasonry>()
 
 const prompt = ref<string>()
@@ -21,17 +21,11 @@ onMounted(async () => {
   })
 
   if (process.client) {
+    loading.value = true
     await useAvatar().resolvePendingTasks()
+    loading.value = false
   }
 })
-
-watch(
-  () => avatarStore.history,
-  async () => {
-    nextTick(() => masonry.value?.layout())
-  },
-  { deep: true },
-)
 
 async function generate() {
   if (loading.value) return
@@ -91,72 +85,46 @@ async function removeBackground() {
           :image="picture"
         />
       </div>
-      <BaseFileInput
-        v-else
-        ref="fileInput"
-        v-model="picture"
-        accept="image/png, image/jpg"
-      />
     </Transition>
+    <BaseFileInput
+      ref="fileInput"
+      v-model="picture"
+      accept="image/png, image/jpg"
+      :class="picture ? 'hidden' : ''"
+    />
     <div class="mt-2 flex w-80 justify-between px-2">
       <div class="flex space-x-2">
         <BaseCanvasButton
           icon="heroicons:paint-brush"
           :active="canvas?.drawing"
-          :disabled="!canvas || loading"
+          :disabled="!canvas"
           @click="canvas.toggleDrawing()"
         />
         <BaseCanvasButton
           icon="mdi:eraser"
-          :disabled="!canvas || !canvas?.dirty || loading"
+          :disabled="!canvas || !canvas.dirty"
           @click="canvas.clear()"
         />
         <BaseCanvasButton
-          :disabled="!canvas || loading"
           icon="fluent:video-background-effect-32-filled"
+          :disabled="!canvas"
           @click="removeBackground()"
         />
       </div>
       <div class="flex space-x-2">
         <BaseCanvasButton
-          :disabled="!canvas || loading"
           icon="heroicons:photo"
-          @click="fileInput?.click()"
+          @click="fileInput?.load()"
         />
       </div>
     </div>
 
-    <div
-      class="mt-2 flex w-full max-w-md items-center space-x-4 rounded-full border border-zinc-200 bg-white py-2 pl-4 pr-2 shadow-lg transition"
-      :class="{ 'cursor-not-allowed opacity-50': loading }"
-    >
-      <input
-        v-model="prompt"
-        href=""
-        class="w-full resize-none outline-none placeholder:text-zinc-300 disabled:cursor-not-allowed disabled:bg-white"
-        placeholder="Imagine something..."
-        :disabled="loading"
-        @keydown.enter.exact="generate()"
-      />
-      <button
-        class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-black text-white disabled:cursor-not-allowed"
-        :class="{ 'animate-pulse': loading }"
-        :disabled="loading"
-        @click="generate()"
-      >
-        <Transition mode="out-in">
-          <Icon
-            v-if="loading"
-            name="humbleicons:spinner-earring"
-            class="animate-spin"
-          />
-          <Icon
-            v-else
-            name="heroicons:arrow-right"
-          />
-        </Transition>
-      </button>
-    </div>
+    <BasePrompt
+      v-model="prompt"
+      class="mt-6 w-full max-w-md"
+      :loading="loading"
+      @generate="generate()"
+    />
     <p
       v-if="error"
       class="mt-2 text-sm text-red-500"
@@ -164,12 +132,12 @@ async function removeBackground() {
       {{ error }}
     </p>
 
-    <div class="masonry relative mt-6 w-full">
+    <div class="masonry relative mt-10 w-full">
       <ClientOnly>
         <div
           v-for="task in avatarStore.history"
           :key="task.id"
-          class="absolute transition"
+          class="absolute transition duration-300 ease-in-out"
         >
           <BaseOutputImage
             :status="task.status"
