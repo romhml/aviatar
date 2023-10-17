@@ -27,6 +27,7 @@ export const avatarRouter = router({
     // Note: Images must be divisible by 8
     let width = input.width - (input.width % 8)
     let height = input.height - (input.height % 8)
+
     // Upscale low resolution images
     if (width < 512) width = width * 2
     if (height < 512) height = height * 2
@@ -38,8 +39,8 @@ export const avatarRouter = router({
         negative_prompt: 'ugly, broken, disfigured, people',
         image: input.image,
         mask: input.mask,
-        height: input.height - (input.height % 8),
-        width: input.width - (input.width % 8),
+        height: height,
+        width: width,
       },
     })
     return output

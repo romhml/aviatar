@@ -1,5 +1,7 @@
+import type { RouterInput, RouterOutput } from '@/server/trpc/routers'
+
 type AvatarState = {
-  history: string[]
+  history: RouterOutput['avatar']['generate'][]
   generateTask: any
 }
 
@@ -15,49 +17,59 @@ export const useAvatar = defineStore('avatar', {
     }) as AvatarState,
 
   actions: {
-    async generate(input: {
-      prompt?: string
-      mask?: string
-      image?: string
-      model?: string
-      width: number
-      height: number
-    }) {
+    async generate(input: RouterInput['avatar']['generate']) {
       const { $client } = useNuxtApp()
-      this.generateTask = await $client.avatar.generate.mutate(input)
-      await this.getGenerateResult()
+
+      const generateTask = await $client.avatar.generate.mutate(input)
+      this.history.unshift({ ...generateTask, input })
+
+      await this.getGenerateResult(generateTask)
     },
 
-    async getGenerateResult() {
+    async getGenerateResult(generateTask: RouterOutput['avatar']['generate']) {
       const { $client } = useNuxtApp()
 
       const maxTries = 30
       let tries = 0
+      let task = generateTask
+
       while (tries < maxTries) {
         tries += 1
 
-        if (this.generateTask.status === 'succeeded') {
-          const output = this.generateTask.output as string[]
-          this.history.unshift(output[0])
-          this.generateTask = null
-
+        if (task.status === 'succeeded') {
           break
         }
 
-        if (this.generateTask.status === 'failed') {
+        if (task.status === 'failed' || task.status === 'canceled') {
+          this.history = this.history.filter((t) => t.id !== task.id)
           throw new Error('Generation failed')
         }
 
         await new Promise((resolve) => setTimeout(resolve, 5000))
-        this.generateTask = await $client.avatar.generateTaskStatus.query(
-          this.generateTask.id,
-        )
+        task = await $client.avatar.generateTaskStatus.query(task.id)
       }
+
+      const index = this.history.findIndex((t) => t.id === task.id)
+      this.history[index] = task
     },
 
     async removeBackground(input: { image: string }) {
       const { $client } = useNuxtApp()
+
       return await $client.avatar.removeBackground.mutate(input)
+    },
+
+    // Resolve pending tasks
+    async resolvePendingTasks() {
+      const pendingTasks = this.history.filter(
+        (t) => t.status === 'starting' || t.status === 'processing',
+      )
+
+      await Promise.all(
+        pendingTasks.map(async (task) => {
+          await this.getGenerateResult(task)
+        }),
+      )
     },
   },
 })

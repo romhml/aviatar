@@ -19,7 +19,19 @@ onMounted(async () => {
     container: '.masonry',
     gutter: 10,
   })
+
+  if (process.client) {
+    await useAvatar().resolvePendingTasks()
+  }
 })
+
+watch(
+  () => avatarStore.history,
+  async () => {
+    nextTick(() => masonry.value?.layout())
+  },
+  { deep: true },
+)
 
 async function generate() {
   if (loading.value) return
@@ -155,13 +167,16 @@ async function removeBackground() {
     <div class="masonry relative mt-6 w-full">
       <ClientOnly>
         <div
-          v-for="img in avatarStore.history"
-          :key="img"
-          class="absolute"
+          v-for="task in avatarStore.history"
+          :key="task.id"
+          class="absolute transition"
         >
           <BaseOutputImage
-            :src="img"
-            @load="masonry?.layout()"
+            :status="task.status"
+            :image="task.input?.image"
+            :mask="task.input?.mask"
+            :output="task.output?.length ? task.output[0] : undefined"
+            :on-load="async () => masonry?.layout()"
           />
         </div>
         <template #fallback>

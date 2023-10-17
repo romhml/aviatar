@@ -1,16 +1,23 @@
 <script setup lang="ts">
+import type { Status } from 'replicate'
+
 const props = defineProps<{
-  src: string
+  status: Status
+  image?: string
+  mask?: string
+  output?: string
+  onLoad?: () => Promise<void>
 }>()
 
 async function download() {
+  if (!props.output) return
+
   const a = document.createElement('a')
-  const blob = await fetch(props.src).then((res) => res.blob())
+  const blob = await fetch(props.output).then((res) => res.blob())
   a.href = URL.createObjectURL(blob) ?? ''
   a.download = 'image.png'
 
   a.click()
-
   a.remove()
 }
 
@@ -24,14 +31,33 @@ const hovered = ref(false)
     @mouseleave="hovered = false"
   >
     <nuxt-img
-      v-bind="$attrs"
-      :src="src"
+      v-if="output"
+      :src="output"
       class="h-full w-full"
+      @load="onLoad"
     />
+
+    <div
+      v-else-if="image"
+      class="relative h-full w-full overflow-hidden"
+    >
+      <nuxt-img
+        :src="image"
+        class="h-full w-80 w-full"
+        @load="onLoad"
+      />
+      <BaseNoise class="absolute top-0" />
+    </div>
+    <div
+      v-else
+      class="relative flex h-72 w-full flex-col items-center justify-center overflow-hidden bg-black"
+    >
+      <BaseNoise class="absolute top-0" />
+    </div>
 
     <Transition>
       <div
-        v-if="hovered"
+        v-if="hovered && props.output"
         class="absolute top-0 z-50 flex h-full w-full items-end justify-end bg-black/40 p-2"
       >
         <Icon
