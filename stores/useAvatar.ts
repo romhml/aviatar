@@ -61,6 +61,9 @@ export const useAvatar = defineStore('avatar', {
 
     // Resolve pending tasks
     async resolvePendingTasks() {
+      // Remove invalid tasks
+      this.history = this.history.filter((t) => !!t.status)
+
       const pendingTasks = this.history.filter(
         (t) => t.status === 'starting' || t.status === 'processing',
       )

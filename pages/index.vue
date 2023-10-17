@@ -147,15 +147,6 @@ async function removeBackground() {
             :on-load="async () => masonry?.layout()"
           />
         </div>
-        <template #fallback>
-          <div class="flex flex-wrap justify-center gap-4">
-            <div
-              v-for="i in 10"
-              :key="i"
-              class="flex h-80 w-80 animate-pulse items-center justify-center rounded bg-zinc-100"
-            />
-          </div>
-        </template>
       </ClientOnly>
     </div>
   </div>
