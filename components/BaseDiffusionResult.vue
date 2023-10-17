@@ -34,7 +34,7 @@ onUnmounted(async () => {
 
 <template>
   <div
-    class="relative cursor-pointer overflow-hidden rounded shadow-xl"
+    class="relative overflow-hidden rounded shadow-xl"
     @mouseenter="hovered = true"
     @mouseleave="hovered = false"
   >

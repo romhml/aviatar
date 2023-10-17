@@ -29,6 +29,7 @@ const emit = defineEmits(['update:modelValue', 'generate'])
       @keydown.enter.exact="emit('generate')"
     />
     <button
+      name="Generate"
       class="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-black text-white disabled:cursor-not-allowed"
       :class="{ 'animate-pulse': loading }"
       :disabled="loading || disabled"
