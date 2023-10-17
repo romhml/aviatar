@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { Model } from '@/models'
+import { DiffusionModel } from '@/server/models'
 
 const props = defineProps<{
   modelValue: string
-  options: Record<string, Model>
+  options: Record<string, DiffusionModel>
   disabled?: boolean
 }>()
 
+const menu = ref<HTMLElement>()
 const currentModel = computed(() => props.options[props.modelValue])
 const toggled = ref(false)
 
@@ -21,12 +22,16 @@ function onUpdate(key: string) {
   emit('update:modelValue', key)
   toggled.value = false
 }
+
+onClickOutside(menu, () => {
+  if (toggled.value) toggled.value = false
+})
 </script>
 
 <template>
   <div class="relative">
     <div
-      class="flex w-[15rem] items-center space-x-2 rounded-full border border-zinc-300 bg-white p-1 transition transition ease-in"
+      class="flex w-[15rem] items-center space-x-2 rounded-full border border-zinc-300 bg-white p-1 transition ease-in"
       :class="{
         'shadow-lg': toggled,
         'hover:shadow-lg': !toggled && !disabled,
@@ -52,6 +57,7 @@ function onUpdate(key: string) {
     <Transition>
       <div
         v-if="toggled"
+        ref="menu"
         class="absolute left-1/2 top-16 z-50 grid w-[20rem] -translate-x-1/2 transform grid-cols-2 gap-4 rounded-lg border border-zinc-300 bg-white px-4 py-2 shadow-lg sm:w-[30rem] sm:grid-cols-3"
       >
         <div
@@ -63,7 +69,6 @@ function onUpdate(key: string) {
           <nuxt-img
             :src="model.picture"
             class="pointer-events-none h-10 w-10 rounded-full object-cover"
-            preload
           />
           <div>
             <p class="text-sm font-medium">{{ model?.label }}</p>

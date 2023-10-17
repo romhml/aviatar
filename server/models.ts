@@ -1,11 +1,11 @@
-export type Model = {
+export type DiffusionModel = {
   tag: string
   name: string
   label: string
   picture: string
 }
 
-export const models: Record<string, Model> = {
+export const diffusionModels: Record<string, DiffusionModel> = {
   sdxl: {
     tag: 'c221b2b8ef527988fb59bf24a8b97c4561f1c671f73bd389f866bfb27c061316',
     label: 'SDXL',

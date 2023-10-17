@@ -1,10 +1,12 @@
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { publicProcedure, router } from '../trpc'
-import { avatarRouter } from './avatar'
+import { diffusionRouter } from './diffusion'
+import { imageEditionRouter } from './imageEditing'
 
 export const appRouter = router({
   probe: publicProcedure.query(() => 'OK'),
-  avatar: avatarRouter,
+  diffusion: diffusionRouter,
+  imageEdition: imageEditionRouter,
 })
 
 export type AppRouter = typeof appRouter

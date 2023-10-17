@@ -7,6 +7,7 @@ export default defineNuxtConfig({
     ['@pinia/nuxt', { autoImports: ['defineStore', 'acceptHMRUpdate'] }],
     '@pinia-plugin-persistedstate/nuxt',
     '@nuxt/image',
+    '@vueuse/nuxt',
   ],
 
   imports: {

@@ -1,32 +1,29 @@
 import type { RouterInput, RouterOutput } from '@/server/trpc/routers'
 
 type AvatarState = {
-  history: RouterOutput['avatar']['generate'][]
-  generateTask: any
+  history: RouterOutput['diffusion']['generate'][]
 }
 
-export const useAvatar = defineStore('avatar', {
+export const useDiffusion = defineStore('diffusion', {
   persist: {
     storage: persistedState.localStorage,
   },
-  state: () =>
-    ({
-      history: [],
-      currentModel: 'barbie',
-      generateTask: null,
-    }) as AvatarState,
+
+  state: () => ({ history: [] }) as AvatarState,
 
   actions: {
-    async generate(input: RouterInput['avatar']['generate']) {
+    async generate(input: RouterInput['diffusion']['generate']) {
       const { $client } = useNuxtApp()
 
-      const generateTask = await $client.avatar.generate.mutate(input)
+      const generateTask = await $client.diffusion.generate.mutate(input)
       this.history.unshift({ ...generateTask, input })
 
       await this.getGenerateResult(generateTask)
     },
 
-    async getGenerateResult(generateTask: RouterOutput['avatar']['generate']) {
+    async getGenerateResult(
+      generateTask: RouterOutput['diffusion']['generate'],
+    ) {
       const { $client } = useNuxtApp()
 
       const maxTries = 30
@@ -46,7 +43,7 @@ export const useAvatar = defineStore('avatar', {
         }
 
         await new Promise((resolve) => setTimeout(resolve, 5000))
-        task = await $client.avatar.generateTaskStatus.query(task.id)
+        task = await $client.diffusion.getTask.query(task.id)
       }
 
       const index = this.history.findIndex((t) => t.id === task.id)
@@ -56,7 +53,7 @@ export const useAvatar = defineStore('avatar', {
     async removeBackground(input: { image: string }) {
       const { $client } = useNuxtApp()
 
-      return await $client.avatar.removeBackground.mutate(input)
+      return await $client.diffusion.removeBackground.mutate(input)
     },
 
     // Resolve pending tasks

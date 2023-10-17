@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { models } from '@/models'
+import { diffusionModels } from '@/server/models'
 import MiniMasonry from 'minimasonry'
 
-const avatarStore = useAvatar()
+const diffusionStore = useDiffusion()
 
 const canvas = ref()
 const loading = ref(false)
@@ -22,7 +22,7 @@ onMounted(async () => {
 
   if (process.client) {
     loading.value = true
-    await useAvatar().resolvePendingTasks()
+    await diffusionStore.resolvePendingTasks()
     loading.value = false
   }
 })
@@ -32,15 +32,14 @@ async function generate() {
   loading.value = true
   error.value = undefined
 
-  const image = await canvas.value?.getImage()
-
   // Read picture as base64 string
   try {
-    await avatarStore.generate({
+    await diffusionStore.generate({
+      model: model.value,
       prompt: prompt.value,
       mask: await canvas.value?.getMask(),
-      image,
-      model: model.value,
+      image: await canvas.value?.getImage(),
+
       width: canvas.value?.getWidth(),
       height: canvas.value?.getHeight(),
     })
@@ -48,16 +47,16 @@ async function generate() {
     console.error(err)
     error.value = 'Something went wrong, please try again later.'
   }
-
   loading.value = false
 }
 
 async function removeBackground() {
   if (!picture.value || loading.value) return
+  const { $client } = useNuxtApp()
   await canvas.value?.clear()
 
   loading.value = true
-  const { output } = await avatarStore.removeBackground({
+  const { output } = await $client.imageEdition.rembg.mutate({
     image: picture.value,
   })
 
@@ -68,9 +67,9 @@ async function removeBackground() {
 
 <template>
   <div class="flex flex-col items-center overflow-visible py-4">
-    <BaseModelPicker
+    <BaseInputModelSelect
       v-model="model"
-      :options="models"
+      :options="diffusionModels"
       :disabled="loading"
       class="mb-6"
     />
@@ -86,33 +85,35 @@ async function removeBackground() {
         />
       </div>
     </Transition>
-    <BaseFileInput
+
+    <BaseInputFile
       ref="fileInput"
       v-model="picture"
       accept="image/png, image/jpg"
       :class="picture ? 'hidden' : ''"
     />
+
     <div class="mt-2 flex w-80 justify-between px-2">
       <div class="flex space-x-2">
-        <BaseCanvasButton
+        <BaseButtonIcon
           icon="heroicons:paint-brush"
           :active="canvas?.drawing"
           :disabled="!canvas"
           @click="canvas.toggleDrawing()"
         />
-        <BaseCanvasButton
+        <BaseButtonIcon
           icon="mdi:eraser"
           :disabled="!canvas || !canvas.dirty"
           @click="canvas.clear()"
         />
-        <BaseCanvasButton
+        <BaseButtonIcon
           icon="fluent:video-background-effect-32-filled"
           :disabled="!canvas"
           @click="removeBackground()"
         />
       </div>
       <div class="flex space-x-2">
-        <BaseCanvasButton
+        <BaseButtonIcon
           icon="heroicons:photo"
           @click="fileInput?.load()"
         />
@@ -135,11 +136,11 @@ async function removeBackground() {
     <div class="masonry relative mt-10 w-full">
       <ClientOnly>
         <div
-          v-for="task in avatarStore.history"
+          v-for="task in diffusionStore.history"
           :key="task.id"
-          class="absolute transition duration-300 ease-in-out"
+          class="absolute transition"
         >
-          <BaseOutputImage
+          <BaseDiffusionResult
             :status="task.status"
             :image="task.input?.image"
             :mask="task.input?.mask"
