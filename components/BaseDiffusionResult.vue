@@ -28,7 +28,10 @@ async function download() {
   a.remove()
 }
 
-const aspectRatio = computed(() => (100 * props.height) / props.width)
+const aspectRatio = computed(() => props.width / props.height)
+const placeholderPaddingTop = computed(
+  () => Math.round(100 * (1 / aspectRatio.value)) + '%',
+)
 </script>
 
 <template>
@@ -41,7 +44,7 @@ const aspectRatio = computed(() => (100 * props.height) / props.width)
       v-if="!imageLoaded"
       class="relative w-full overflow-hidden rounded"
       :style="{
-        paddingTop: aspectRatio + '%',
+        paddingTop: placeholderPaddingTop,
       }"
     >
       <BaseNoise class="absolute top-0" />
