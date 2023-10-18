@@ -131,7 +131,7 @@ async function removeBackground() {
         />
         <BaseButtonIcon
           icon="fluent:video-background-effect-32-filled"
-          :disabled="!canvas"
+          :disabled="!canvas || loading"
           @click="removeBackground()"
         />
       </div>

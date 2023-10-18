@@ -18,14 +18,14 @@ const emit = defineEmits(['update:modelValue', 'generate'])
 <template>
   <div
     class="flex items-center space-x-4 rounded-full border border-zinc-200 bg-white py-2 pl-4 pr-2 shadow-lg transition"
-    :class="{ 'cursor-not-allowed opacity-50': loading || disabled }"
+    :class="{ 'cursor-not-allowed opacity-50': disabled }"
   >
     <input
       ref="textarea"
       v-model="prompt"
       class="w-full resize-none outline-none placeholder:text-zinc-300 disabled:cursor-not-allowed disabled:bg-white"
       placeholder="Imagine something..."
-      :disabled="loading || disabled"
+      :disabled="disabled"
       @keydown.enter.exact="emit('generate')"
     />
     <button

@@ -1,76 +1,73 @@
-<script setup>
-import * as THREE from 'three'
-
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
-import { MTLLoader } from 'three/addons/loaders/MTLLoader.js'
+<script setup lang="ts">
+import * as zip from '@zip.js/zip.js'
 
 const prompt = ref()
-const container = ref()
+const loading = ref(false)
+const picture = ref()
 
-onMounted(() => {
-  const renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setSize(container.value.clientWidth, container.value.clientHeight)
+async function generate() {
+  if (loading.value) return
+  loading.value = true
 
-  const scene = new THREE.Scene()
-  const camera = new PerspectiveCamera(
-    45,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    20,
-  )
+  const { $client } = useNuxtApp()
 
-  const controls = new OrbitControls(camera, renderer.domElement)
-  container.value.appendChild(renderer.domElement)
-
-  const geo = new THREE.PlaneGeometry(2000, 2000, 8, 8)
-  const mat = new THREE.MeshBasicMaterial({
-    color: 0x000000,
-    side: THREE.DoubleSide,
+  await $client.diffusion.generate.mutate({
+    prompt: prompt.value,
   })
 
-  const plane = new THREE.Mesh(geo, mat)
-  plane.rotateX(-Math.PI / 2)
-  scene.add(plane)
-
-  const light = new THREE.AmbientLight(0x404040) // soft white light
-  scene.add(light)
-
-  const mtloader = new MTLLoader()
-  mtloader.load('/dev/image.mtl', function (materials) {
-    materials.preload()
-    const loader = new OBJLoader()
-
-    loader.setMaterials(materials)
-    loader.load('/dev/image.obj', function (object) {
-      object.scale.setScalar(100)
-      scene.add(object)
-    })
+  const result = await $client.gaussian.generate.mutate({
+    prompt: prompt.value,
+    image: picture.value,
   })
 
-  camera.position.z = 0
-  controls.update()
-  renderer.render(scene, camera)
-  const animate = () => {
-    requestAnimationFrame(animate)
-    controls.update()
-    renderer.render(scene, camera)
-  }
+  loading.value = false
+}
 
-  animate()
+const object = ref()
+const material = ref()
+const albedo = ref()
+
+onMounted(async () => {
+  const file = '/dev/out.zip'
+  const blob = await fetch(file).then((res) => res.blob())
+
+  const reader = new zip.ZipReader(new zip.BlobReader(blob))
+  reader.getEntries().then(async (entries) => {
+    const obj = entries.find((entry) => entry.filename === 'logs/image.obj')
+    object.value = await obj?.getData!(new zip.TextWriter())
+
+    const mtl = entries.find((entry) => entry.filename === 'logs/image.mtl')
+    console.log(mtl)
+    material.value = await mtl?.getData!(new zip.TextWriter())
+
+    const albed = entries.find(
+      (entry) => entry.filename === 'logs/image_albedo.png',
+    )
+    albedo.value = await albed?.getData!(new zip.Data64URIWriter())
+  })
 })
 </script>
 
 <template>
   <div class="flex flex-col items-center overflow-visible py-4">
-    <div
-      ref="container"
-      class="h-80 w-80 overflow-hidden rounded bg-zinc-100"
+    <BaseInputFile
+      v-model="picture"
+      accept="image/png, image/jpg"
     />
 
     <BasePrompt
       v-model="prompt"
       class="my-8 w-full max-w-md"
+      :loading="loading"
+      @generate="generate"
+    />
+
+    <BaseGaussianResult
+      v-if="object && material && albedo"
+      class="h-80 w-80 overflow-hidden rounded bg-zinc-100"
+      :obj="object"
+      :mat="material"
+      :albedo="albedo"
     />
   </div>
 </template>
