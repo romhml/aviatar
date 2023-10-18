@@ -78,8 +78,14 @@ async function removeBackground() {
     image: picture.value,
   })
 
-  picture.value = output
-  loading.value = false
+  // Convert output as base64 string
+  const blob = await fetch(output).then((res) => res.blob())
+  const reader = new FileReader()
+  reader.readAsDataURL(blob)
+  reader.onloadend = () => {
+    picture.value = reader.result as string
+    loading.value = false
+  }
 }
 </script>
 

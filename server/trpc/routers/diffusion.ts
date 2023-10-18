@@ -60,6 +60,7 @@ export const diffusionRouter = router({
         height: height,
         width: width,
         num_inference_steps: 100,
+        prompt_strength: 0.5,
       },
     })
 
