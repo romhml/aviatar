@@ -14,17 +14,36 @@ const model = ref<string>('sdxl')
 const error = ref()
 const picture = ref<string>()
 
+const masonryInitialized = ref(false)
+
 onMounted(async () => {
   masonry.value = new MiniMasonry({
     container: '.masonry',
     gutter: 10,
+    minify: true,
   })
+
+  // Layout masonry and enable transitions on tiles
+  masonry.value?.layout()
+  await nextTick(() => (masonryInitialized.value = true))
 
   if (process.client) {
     loading.value = true
     await diffusionStore.resolvePendingTasks()
     loading.value = false
   }
+})
+
+watch(
+  () => diffusionStore.history,
+  async () => {
+    await nextTick(() => masonry.value?.layout())
+  },
+  { deep: true },
+)
+
+onUnmounted(() => {
+  masonry.value?.destroy()
 })
 
 async function generate() {
@@ -39,7 +58,6 @@ async function generate() {
       prompt: prompt.value,
       mask: await canvas.value?.getMask(),
       image: await canvas.value?.getImage(),
-
       width: canvas.value?.getWidth(),
       height: canvas.value?.getHeight(),
     })
@@ -133,37 +151,22 @@ async function removeBackground() {
     </p>
 
     <div class="masonry relative mt-10 w-full">
-      <ClientOnly>
-        <div
-          v-for="task in diffusionStore.history"
-          :key="task.id"
-          class="absolute transition"
-        >
-          <BaseDiffusionResult
-            :status="task.status"
-            :image="task.input?.image"
-            :mask="task.input?.mask"
-            :output="task.output?.length ? task.output[0] : undefined"
-            :on-load="async () => masonry?.layout()"
-          />
-        </div>
-      </ClientOnly>
+      <div
+        v-for="task in diffusionStore.history"
+        :key="task.id"
+        class="absolute"
+        :class="{ transition: masonryInitialized }"
+      >
+        <BaseDiffusionResult
+          :status="task.status"
+          :image="task.input?.image"
+          :mask="task.input?.mask"
+          :height="task.input?.height"
+          :width="task.input?.width"
+          :output="task.output?.length ? task.output[0] : undefined"
+          :on-load="async () => masonry?.layout()"
+        />
+      </div>
     </div>
   </div>
 </template>
-
-<style lang="postcss">
-* {
-  @apply antialiased;
-}
-
-.v-enter-active,
-.v-leave-active {
-  transition: opacity 0.1s;
-}
-
-.v-enter-from,
-.v-leave-to {
-  opacity: 0;
-}
-</style>

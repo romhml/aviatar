@@ -100,7 +100,7 @@ defineExpose({
   },
 
   async getImage() {
-    return img.value?.toDataURL()
+    return img.value?.toDataURL({ multiplier: 1 / img.value.scaleX })
   },
 
   getWidth() {

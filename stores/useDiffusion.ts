@@ -16,8 +16,7 @@ export const useDiffusion = defineStore('diffusion', {
       const { $client } = useNuxtApp()
 
       const generateTask = await $client.diffusion.generate.mutate(input)
-      this.history.unshift({ ...generateTask, input })
-
+      this.history.unshift(generateTask)
       await this.getGenerateResult(generateTask)
     },
 
@@ -48,12 +47,6 @@ export const useDiffusion = defineStore('diffusion', {
 
       const index = this.history.findIndex((t) => t.id === task.id)
       this.history[index] = task
-    },
-
-    async removeBackground(input: { image: string }) {
-      const { $client } = useNuxtApp()
-
-      return await $client.diffusion.removeBackground.mutate(input)
     },
 
     // Resolve pending tasks
