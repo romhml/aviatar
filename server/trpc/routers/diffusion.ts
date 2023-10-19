@@ -60,7 +60,7 @@ export const diffusionRouter = router({
         mask: input.mask,
         height,
         width,
-        inference_steps: 40,
+        inference_steps: 25,
       },
     })
 

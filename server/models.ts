@@ -19,7 +19,6 @@ export const diffusionModels: Record<string, DiffusionModel> = {
     label: 'Dreamshaper',
     tag: 'c7959eb3a86c09b449dacc11ce8bba295fda466fc6935ab8709e35f4f48c980c',
     picture: '/models/dream.png',
-    promptSuffix: ' (Dreamshaper), Dreamshaper',
   },
 
   botw: {
