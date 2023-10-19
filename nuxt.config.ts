@@ -12,7 +12,7 @@ export default defineNuxtConfig({
   ],
 
   imports: {
-    dirs: ['stores'],
+    dirs: ['stores/**', 'helpers/**'],
   },
   build: {
     transpile: ['trpc-nuxt'],
