@@ -73,9 +73,6 @@ devDependencies:
   '@vueuse/nuxt':
     specifier: ^10.5.0
     version: 10.5.0(nuxt@3.7.4)(vue@3.3.4)
-  addons:
-    specifier: link:@types/three/addons
-    version: link:@types/three/addons
   commitlint:
     specifier: ^17.8.0
     version: 17.8.0
