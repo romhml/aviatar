@@ -1,73 +1,69 @@
 <script setup lang="ts">
-import * as zip from '@zip.js/zip.js'
-
 const prompt = ref()
 const loading = ref(false)
-const picture = ref()
+const output = ref('/dev/out.zip')
+const error = ref()
+
+const gaussianStore = useGaussian()
 
 async function generate() {
   if (loading.value) return
+  error.value = undefined
   loading.value = true
 
-  const { $client } = useNuxtApp()
+  // const generateTask = await $client.diffusion.generate.mutate({
+  //   prompt: prompt.value,
+  // })
+  //
+  // const { output: diffusionOutput } = await pollTask(generateTask)
+  //
+  // // Convert to base64
+  // const blob = await fetch(diffusionOutput[0]).then((res) => res.blob())
+  // const image = await new Promise<string>((resolve, reject) => {
+  //   const reader = new FileReader()
+  //   reader.onloadend = () => resolve(reader.result as string) // Resolve the promise with the base64 string
+  //   reader.onerror = reject // Reject the promise on read error
+  //   reader.readAsDataURL(blob) // Read the blob as data URL (base64)
+  // })
 
-  await $client.diffusion.generate.mutate({
-    prompt: prompt.value,
-  })
+  try {
+    const result = await gaussianStore.generate({
+      prompt: prompt.value,
+    })
 
-  await $client.gaussian.generate.mutate({
-    prompt: prompt.value,
-    image: picture.value,
-  })
+    console.log(output)
+    output.value = result.output[0]
+  } catch (err) {
+    console.error(err)
+    error.value = 'Something went wrong, please try again later.'
+  }
 
   loading.value = false
 }
-
-const object = ref()
-const material = ref()
-const albedo = ref()
-
-onMounted(async () => {
-  const file = '/dev/out.zip'
-  const blob = await fetch(file).then((res) => res.blob())
-
-  const reader = new zip.ZipReader(new zip.BlobReader(blob))
-  reader.getEntries().then(async (entries) => {
-    const obj = entries.find((entry) => entry.filename === 'logs/image.obj')
-    object.value = await obj?.getData!(new zip.TextWriter())
-
-    const mtl = entries.find((entry) => entry.filename === 'logs/image.mtl')
-    console.log(mtl)
-    material.value = await mtl?.getData!(new zip.TextWriter())
-
-    const albed = entries.find(
-      (entry) => entry.filename === 'logs/image_albedo.png',
-    )
-    albedo.value = await albed?.getData!(new zip.Data64URIWriter())
-  })
-})
 </script>
 
 <template>
   <div class="flex flex-col items-center overflow-visible py-4">
-    <BaseInputFile
-      v-model="picture"
-      accept="image/png, image/jpg"
-    />
-
     <BasePrompt
       v-model="prompt"
-      class="my-8 w-full max-w-md"
+      class="mt-8 w-full max-w-md"
       :loading="loading"
       @generate="generate"
     />
 
+    <div class="my-1 text-sm">
+      <p
+        v-if="error"
+        class="text-red-500"
+      >
+        {{ error }}
+      </p>
+      <p v-else>&nbsp;</p>
+    </div>
+
     <BaseGaussianResult
-      v-if="object && material && albedo"
-      class="h-80 w-80 overflow-hidden rounded bg-zinc-100"
-      :obj="object"
-      :mat="material"
-      :albedo="albedo"
+      class="mt-2 h-96 w-full max-w-md overflow-hidden rounded bg-zinc-100"
+      :output="output"
     />
   </div>
 </template>

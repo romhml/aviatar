@@ -13,6 +13,7 @@
   height: 200%;
   background: transparent url('/noise.png') repeat 0 0;
   background-repeat: repeat;
+  background-size: 70%;
   animation: animation-noise 0.2s infinite ease-in-out;
   opacity: 0.9;
   visibility: visible;
