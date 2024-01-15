@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DiffusionModel } from '@/server/models'
+import type { DiffusionModel } from '@/server/models'
 
 const props = defineProps<{
   modelValue: string

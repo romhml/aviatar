@@ -15,7 +15,7 @@ async function generate() {
     prompt: prompt.value,
   })
 
-  const result = await $client.gaussian.generate.mutate({
+  await $client.gaussian.generate.mutate({
     prompt: prompt.value,
     image: picture.value,
   })
